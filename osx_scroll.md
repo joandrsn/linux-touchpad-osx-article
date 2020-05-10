@@ -1,14 +1,15 @@
+Draft: Something might be incorrect.
+
 # Why linux does not have a touchpad as good as a Macbook Pro
 
 ## Motivation
 I'm an avid reader of [Hacker News][hn] and one day Bill Hardings post of [Linux touchpad like a Macbook: goal worth persuing?][bill1] caught my attention.
 Having tried Linux, OS X and Windows 10, I couldn't agree with the author more.
-Then [another post from Bill][bill2] and finally [the last post][bill3] got me thinking: Why is this so hard?
-In this post, I will be trying a bit to explain on why this is difficult and how it could maybe be implemented.
+Then [another post from Bill][bill2] and finally [the last post][bill3] got me thinking: Why is this so hard to create a good touchpad experience on linux?
+In this post, I will be trying to explain on why this is difficult and how it could maybe be implemented.
 
-Upon reading all of the comments on [Hacker News][hn-bill3], I stumble upon a general resource like this post by Pavel Fatin: [Scrolling with pleasure][pfatin] (2017).
+Upon reading all of the comments on [Hacker News][hn-bill3], I stumble upon a great general resource post by Pavel Fatin on scrolling behaviour: [Scrolling with pleasure][pfatin] (2017). The post covers both OS X, Linux and Windows, but with a deeper focus on scrolling.
 Pavel Fatin implemented smooth scrolling in IntelliJ and I guess he also had to do extensive research in order to simply understand how it works on every platform.
-For trying to understand why scrolling in particular is so hard, this is the best resource I have found so far.
 
 ## History
 In the past a hardware manufacturors made the drivers for linux to use.
@@ -16,18 +17,22 @@ This resulted in drivers like synaptics.
 Synaptics was both great and a curse in an on its own.
 Quirks with each individual touchpad resulted in a bucketload of settings for these touchpads.
 Also in the driver were some special features like kinetic scrolling.
-In the driver, the only way that synaptics could create kinetic scrolling was as a driver to keep outputting events after the user had lifted his/her fingers from the touchpad. This resulted in an experience where if another windows popped up, the scrolling would continue in that window. [Source (libinput FAQ)][libinput-kinetic-scroll]
+In the driver, the only way that synaptics driver could create kinetic scrolling was to keep outputting events after the user had lifted his/her fingers from the touchpad. This resulted in an experience where if another windows popped up, the scrolling would continue in that window. [Source (libinput FAQ)][libinput-kinetic-scroll]
+To see all of the options for the synaptics driver, read [synaptics(4)][synaptics-man].
+As a developer, you might understand that only the most patient of users has time to read though ~70 options in order to actually tune their touchpad.
+Synaptics is no longer being maintained.
+
 
 ## Libinput
 Along came [libinput].
-Libinput is supposed to be a monolithic driver which supports all keyboards, mice and drawing tablets[0].
-It aims to be only as configurable as needed. So from for example the synptics drivers 70 configuration parameters, we now have 8. (Source needed).
+Libinput is supposed to be a monolithic driver which supports all keyboards, mice and drawing tablets - [Source][libinput-purpose].
+It aims to be only as configurable as needed. So from for example the synptics drivers ~70 configuration parameters, we now have 8. (Source needed).
 Some might think: My old driver was infinitely better! More configuration = better. But in reality, the goal of libinput is to handle all of the different quirks with hardware sensors.
 Additionally, libinput can do rudimental things like thumb detection.
 
 But ultimatly, libinput gets a lot of flag for not being what some of the old drivers used to do.
 Example: 
-![](images/rant1)
+![](images/rant1.png)
 
 [Tweet][twitter-libinput1]
 
@@ -45,7 +50,7 @@ Example:
 
 (The final one being my favourite)
 
-But please, **please** understand this is just an outlet for frustration. Their touchpad experience is bad and their inability to do something about it is simply frustrating.
+I understand that this is just an outlet for frustration. Their touchpad experience is bad and their inability to do something about it is simply frustrating.
 
 
 
@@ -55,7 +60,8 @@ Now libinput is really meant to be used for wayland, but since some compatibilit
 xf86-input-libinput converts what libinput outputs into something that X11 understands.
 
 ## x11
-The X server is quite old and some developers seem to dislike it a lot. Some speculate that wayland is a better way to move forward. But the fact is that currently not all applications support wayland 
+This is where it starts to get interesting. 
+The X server is quite old and some developers seem to dislike it a lot. Some speculate that wayland is a better way to move forward. But the fact is that currently not all applications support wayland.
 
 ## But wait, I dont want to know this, I just want features.
 Well all of this depend on the applications understanding this
@@ -84,7 +90,7 @@ At Microsoft Build conference 2013, they could finally announce that they were w
 From this point, instead of hardware vendors implementing a driver and greatly differentiating the experience of the user, Microsoft now said: You send ud the input from your driver directly to this API and your trackpad will be marked "Windows Precision Touchpad".
 And users absolutely loved it.
 Writeups like these [ArsTechnica][ars], [The Verge][theverge] and [PCMag][pcmag] are a statement of their success.
-Even in 2015, at WinHEC (Windows Hardware Engineering Conference, held in Shenzhen, China) Microsoft tried to convince hardware partners why Precision Touchpad drivers are great with the talk [Input][winhec-input]
+In 2016, at WinHEC (Windows Hardware Engineering Conference, held in Shenzhen, China) Microsoft even tried to convince hardware partners why Precision Touchpad drivers are great with the talk called [Input][winhec-input]
 
 Looking a bit more into what Microsoft does, [the implementation guide][windows-precision-guide] from Microsoft posts the following quote:
 
@@ -109,7 +115,7 @@ To me this says that i3 only supports 3 mouse buttons and 4 different scroll dir
 
 This leads to projects like [libinput-gestures][libinput-gestures].
 Now what does libinput-gestures do?
-It reads libinput and executes commands to X11 using [xdotool][xdotool]
+It reads libinput and can then execute commands. For example to X11 using [xdotool][xdotool]
 
 Seeing how much you have to assemble in order to just make a settings page referencing all of these settings, it's no wonder that configuration have to be done on a very specific place each time.
 How the hell are users supposed to understand this tech stack.
@@ -161,6 +167,9 @@ As mentioned earlier, libinput actually knows this and addtionally provides an A
 `libinput_event_pointer_get_axis_source()`
 Unfortunatly, only [weston][weston-compositor] (the reference compositor for wayland) seem to actually use this feature.
 
+## I want to work on this. Where do I start?
+For getting general knowledge, I would suggest 
+
 
 [libinput]: https://wayland.freedesktop.org/libinput/doc/latest/
 [xf86-input-libinput]: https://github.com/freedesktop/xorg-xf86-input-libinput
@@ -194,3 +203,5 @@ Unfortunatly, only [weston][weston-compositor] (the reference compositor for way
 [chromeos]: https://www.google.com/chromebook/chrome-os/
 [remove-x11-chrome-os]: https://www.phoronix.com/scan.php?page=news_item&px=Chrome-OS-X11-Free
 [chrome-ozone]: https://chromium.googlesource.com/chromium/src.git/+/master/docs/ozone_overview.md
+[libinput-purpose]: https://wayland.freedesktop.org/libinput/doc/latest/what-is-libinput.html#what-is-libinput
+[synaptics-man]: https://jlk.fjfi.cvut.cz/arch/manpages/man/synaptics.4
